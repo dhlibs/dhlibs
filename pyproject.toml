@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "dhlibs"
+version = "0.1.0"
+description = ""
+authors = ["DinhHuy2010 <huy04052010@outlook.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
