@@ -35,7 +35,8 @@ ignore = [
     "PLR0912", # Too many branches
     "PLR2004", # Magic values
     "PLR0915", # Too many statements
-    "PLW0603" # Global statement
+    "PLW0603", # Global statement
+    "PLR0913" # Too many arguments
 ]
 
 [tool.pyright]
