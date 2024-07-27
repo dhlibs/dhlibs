@@ -23,3 +23,12 @@
 # SOFTWARE.
 
 
+"""
+cachedop - caching function for binary oprations
+"""
+
+from ._typings import AuditEvent
+from .audit import Auditer, register_audit_callback
+from .core import cached_opfunc
+
+__all__ = ["Auditer", "register_audit_callback", "cached_opfunc", "AuditEvent"]

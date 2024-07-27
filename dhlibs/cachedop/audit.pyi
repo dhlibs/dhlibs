@@ -22,4 +22,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from typing import Any, Mapping
 
+from ._typings import AuditCallableType, AuditEvent, AuditEvents
+
+class Auditer:
+    def register(self, callback: AuditCallableType, on_events: AuditEvents = None) -> None: ...
+    def clear(self, events: AuditEvents) -> None: ...
+    def audit(self, event: AuditEvent, args: Mapping[str, Any]) -> None: ...
+
+audit = Auditer()
+
+def register_audit_callback(callback: AuditCallableType, on_events: AuditEvents = None) -> None: ...

@@ -23,3 +23,27 @@
 # SOFTWARE.
 
 
+from collections import defaultdict
+from enum import Enum, auto
+from typing import Any, Callable, Hashable, NamedTuple, Optional, Sequence, TypeAlias, Union
+
+
+class AuditEvent(Enum):
+    HIT = auto()
+    MISS = auto()
+    CALL = auto()
+    CLEAN = auto()
+    REMOVE_KEY = auto()
+
+
+CacheInfo = NamedTuple(
+    "cachedop_cacheinfo",
+    [("size", int), ("hits", int), ("misses", int), ("cleanup_count", int)],
+)
+OperatorCallableType: TypeAlias = Callable[[int, int], int]
+KeyCallableType: TypeAlias = Callable[[tuple[int, ...]], Hashable]
+
+
+AuditCallableType: TypeAlias = Callable[[AuditEvent, dict[str, Any]], None]
+AuditDefaultDict: TypeAlias = defaultdict[AuditEvent, list[AuditCallableType]]
+AuditEvents: TypeAlias = Optional[Union[AuditEvent, Sequence[AuditEvent]]]
