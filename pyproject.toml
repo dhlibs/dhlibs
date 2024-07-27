@@ -8,6 +8,39 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 
+[tool.ruff]
+indent-width = 4  # Force 4 spaces per indentation level
+line-length = 120  # Set maximum line length to 100 characters
+
+[tool.ruff.lint]
+# List of error codes to ignore
+# Select specific classes of rules to apply
+select = [
+    "E",
+    "W",
+    "F",
+    "I",
+    "B",
+    "C4",
+    "ARG",
+    "SIM",
+    "PTH",
+    "PL"
+]
+ignore = [
+    "W291", # Trailing whitespace
+    "E501", # Line too long
+    # "W292", # No newline at end of file
+    "W293",  # Blank line contains whitespace
+    "PLR0912", # Too many branches
+    "PLR2004", # Magic values
+    "PLR0915", # Too many statements
+    "PLW0603" # Global statement
+]
+
+[tool.pyright]
+# strict for absoulte clean code™
+typeCheckingMode = "strict"
 
 [build-system]
 requires = ["poetry-core"]
