@@ -10,6 +10,9 @@ packages = [{include = "dhlibs"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 
+[tool.poetry.group.tests.dependencies]
+pytest = "^8.3.2"
+
 [tool.ruff]
 indent-width = 4  # Force 4 spaces per indentation level
 line-length = 120  # Set maximum line length to 100 characters
