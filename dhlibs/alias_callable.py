@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+""""alias_callable - very simple module to create aliased callables"""
+
 from functools import wraps
 from typing import Callable, Optional, ParamSpec, TypeVar
 
