@@ -40,13 +40,14 @@ select = [
 ignore = [
     "W291", # Trailing whitespace
     "E501", # Line too long
-    # "W292", # No newline at end of file
     "W293",  # Blank line contains whitespace
     "PLR0912", # Too many branches
     "PLR2004", # Magic values
     "PLR0915", # Too many statements
     "PLW0603", # Global statement
-    "PLR0913" # Too many arguments
+    "PLR0913", # Too many arguments
+    "B010" # setattr
+    
 ]
 
 [tool.pyright]
