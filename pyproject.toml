@@ -17,6 +17,9 @@ pytest = "^8.3.2"
 indent-width = 4  # Force 4 spaces per indentation level
 line-length = 120  # Set maximum line length to 100 characters
 
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
 [tool.ruff.lint]
 # List of error codes to ignore
 # Select specific classes of rules to apply
@@ -33,8 +36,6 @@ select = [
     "PL"
 ]
 
-[tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = "all"
 
 ignore = [
     "W291", # Trailing whitespace
