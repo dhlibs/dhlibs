@@ -5,7 +5,7 @@ description = ""
 authors = ["DinhHuy2010 <huy04052010@outlook.com>"]
 repository = "https://github.com/DinhHuy2010/dhlibs"
 readme = "README.md"
-packages = [{include = "dhlibs"}]
+packages = [{ include = "dhlibs" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -15,7 +15,7 @@ pytest = "^8.3.2"
 
 [tool.ruff]
 indent-width = 4  # Force 4 spaces per indentation level
-line-length = 120  # Set maximum line length to 100 characters
+line-length = 120 # Set maximum line length to 100 characters
 
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
@@ -23,31 +23,19 @@ ban-relative-imports = "all"
 [tool.ruff.lint]
 # List of error codes to ignore
 # Select specific classes of rules to apply
-select = [
-    "E",
-    "W",
-    "F",
-    "I",
-    "B",
-    "C4",
-    "ARG",
-    "SIM",
-    "PTH",
-    "PL"
-]
+select = ["E", "W", "F", "I", "B", "C4", "ARG", "SIM", "PTH", "PL"]
 
 
 ignore = [
-    "W291", # Trailing whitespace
-    "E501", # Line too long
-    "W293",  # Blank line contains whitespace
+    "W291",    # Trailing whitespace
+    "E501",    # Line too long
+    "W293",    # Blank line contains whitespace
     "PLR0912", # Too many branches
     "PLR2004", # Magic values
     "PLR0915", # Too many statements
     "PLW0603", # Global statement
     "PLR0913", # Too many arguments
-    "B010" # setattr
-    
+    "B010",    # setattr
 ]
 
 [tool.pyright]
