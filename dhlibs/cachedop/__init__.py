@@ -23,9 +23,7 @@
 # SOFTWARE.
 
 
-"""
-cachedop - caching function for binary oprations
-"""
+"""dhlibs.cachedop - caching function for binary oprations"""
 
 from ._typings import AuditEvent
 from .audit import Auditer, register_audit_callback
