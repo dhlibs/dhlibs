@@ -14,6 +14,7 @@ python = "^3.11"
 pytest = "^8.3.2"
 
 [tool.ruff]
+cache-dir = ".cache/ruff"
 indent-width = 4  # Force 4 spaces per indentation level
 line-length = 120 # Set maximum line length to 100 characters
 
@@ -41,6 +42,10 @@ ignore = [
 [tool.pyright]
 # strict for absoulte clean code™
 typeCheckingMode = "strict"
+
+[tool.pytest.ini_options]
+cache_dir = ".cache/pytest"
+addopts = "--verbose"
 
 [build-system]
 requires = ["poetry-core"]
