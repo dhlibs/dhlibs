@@ -29,6 +29,10 @@ select = [
     "PTH",
     "PL"
 ]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
 ignore = [
     "W291", # Trailing whitespace
     "E501", # Line too long
