@@ -29,6 +29,7 @@ with support for slices, infinite ranges, and
 tuple-based ranges.
 """
 
+from functools import total_ordering
 from itertools import count
 from typing import Any, Iterable, Optional, TypeAlias, Union, cast, overload
 
@@ -37,6 +38,18 @@ from dhlibs.reprfmt import put_repr
 _IndicesArgsType: TypeAlias = tuple[int, ...] | slice
 
 _marker = put_repr(type("_marker", (), {}))()
+
+
+class BaseIndicesException(ValueError, IndexError):
+    pass
+
+
+class OutOfRange(BaseIndicesException):
+    pass
+
+
+class GotInfiniteRange(BaseIndicesException):
+    pass
 
 
 def _resolve_slice(s: slice) -> tuple[int, int | None, int]:
@@ -56,7 +69,7 @@ def _make_niter_from_slice(s: slice) -> Iterable[int]:
     start, stop, step = _resolve_slice(s)
     if stop is None:
         if step < 0:
-            raise IndexError("negative step index without stop limit is not supported")
+            raise GotInfiniteRange("negative step index without stop limit is not supported")
         r = count(start, step)
     else:
         r = range(start, stop, step)
@@ -92,6 +105,7 @@ def _compute_range_length(start: int, stop: int, step: int) -> int:
 
 
 @put_repr
+@total_ordering
 class indices:
     """
     indices - flexible handling of index ranges
@@ -117,7 +131,7 @@ class indices:
     - __len__: Compute the length of the range.
     """
 
-    __slots__ = ("_slice",)
+    __slots__ = ("_slice", "_iter")
 
     @overload
     def __init__(self) -> None: ...
@@ -131,6 +145,7 @@ class indices:
     def __init__(self, s: tuple[int, ...], /) -> None: ...
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self._slice = _resolve_indices_args(args, kwargs)
+        self._iter = None
 
     def values(self) -> Iterable[int]:
         """Get the values."""
@@ -163,16 +178,16 @@ class indices:
         start, stop, step = _resolve_slice(self._slice)
         if stop is None:
             if index < 0:
-                raise IndexError("negative indices without stop limit is not supported")
+                raise GotInfiniteRange("negative indices without stop limit is not supported")
             if step < 0:
-                raise IndexError("negative step index without stop limit is not supported")
+                raise GotInfiniteRange("negative step index without stop limit is not supported")
             final_index = start + (index * step)
         else:
             range_length = _compute_range_length(start, stop, step)
             if index < 0:
                 index += range_length
-            if index < 0 or index >= range_length:
-                raise IndexError("index out of range")
+            if index >= range_length:
+                raise OutOfRange("index out of range")
             final_index = start + index * step
         return final_index
 
@@ -222,15 +237,16 @@ class indices:
         start, stop, step = _resolve_slice(self._slice)
 
         if stop is None:
-            raise ValueError("Cannot reverse an infinite range")
+            raise GotInfiniteRange("Cannot reverse an infinite range")
 
-        # Calculate the new start, stop, and step for the reversed range
-        # The last element in the reversed range should be the last element of the original range
         new_start = stop - ((stop - start) % step or step)
         new_stop = start - step
         new_step = -step
 
         return self.__class__(slice(new_start, new_stop, new_step))
+
+    def __reversed__(self):
+        return self.reverse()
 
     @overload
     def __getitem__(self, index: int) -> int: ...
@@ -248,7 +264,16 @@ class indices:
         return self.contains(index)
 
     def __iter__(self):
-        return iter(self.values())
+        return self
+
+    def __next__(self) -> int:
+        if self._iter is None:
+            self._iter = iter(self.values())
+        try:
+            return next(self._iter)
+        except StopIteration:
+            self._iter = iter(self.values())
+            raise
 
     @property
     def slice(self) -> _IndicesArgsType:
@@ -269,16 +294,48 @@ class indices:
 
     def __len__(self) -> int:
         if self.is_infinite:
-            raise ValueError("cannot compute length of an infinite range")
+            raise GotInfiniteRange("cannot compute length of an infinite range")
 
         if isinstance(self._slice, tuple):
             return len(self._slice)
 
         start, stop, step = _resolve_slice(self._slice)
 
-        if stop is None:
-            raise RuntimeError("internal error: stop should not be None here.")
+        assert stop is not None, "internal error: stop should not be None here."
 
         length = (stop - start + (step - 1 if step > 0 else step + 1)) // step
 
         return max(0, length)
+
+    def __hash__(self) -> int:
+        return hash(self._slice)
+
+    def __eq__(self, obj: object) -> bool:
+        if not isinstance(obj, indices):
+            return NotImplemented
+        return self._slice == obj._slice
+
+    def __gt__(self, obj: object) -> bool:
+        if not isinstance(obj, indices):
+            return NotImplemented
+        if self.is_infinite:
+            final_out = True
+        elif obj.is_infinite:
+            final_out = False
+        if isinstance(self._slice, tuple):
+            if isinstance(obj._slice, tuple):
+                final_out = len(self._slice) > len(obj._slice)
+            else:
+                start, stop, step = _resolve_slice(obj._slice)
+                assert stop
+                final_out = len(self._slice) > _compute_range_length(start, stop, step)
+        else:
+            start, stop, step = _resolve_slice(self._slice)
+            assert stop
+            if isinstance(obj._slice, tuple):
+                final_out = _compute_range_length(start, stop, step) > len(obj._slice)
+            else:
+                ostart, ostop, ostep = _resolve_slice(obj._slice)
+                assert ostop
+                final_out = _compute_range_length(start, stop, step) > _compute_range_length(ostart, ostop, ostep)
+        return final_out

@@ -24,6 +24,7 @@
 
 import pytest
 
+from dhlibs.indices import OutOfRange
 from dhlibs.indices import indices as indices_range
 
 
@@ -32,25 +33,30 @@ def test_empty_range():
     assert len(list(a)) == 0
 
 
-def test_simple_range():
-    b = indices_range(10)
-    assert list(b) == list(range(10))
-    assert len(b) == 10
-    assert b.get(0) == 0
-    assert b.get(9) == 9
-    with pytest.raises(IndexError):
-        b.get(10)
+@pytest.mark.parametrize("stop, expected", [
+    (10, list(range(10))),
+    (5, list(range(5))),
+    (0, [])
+])
+def test_simple_range(stop: int, expected: list[int]):
+    b = indices_range(stop)
+    assert list(b) == expected
+    assert len(b) == len(expected)
 
-
-def test_step_range():
-    c = indices_range(stop=10, step=2)
-    assert list(c) == [0, 2, 4, 6, 8]
-    assert len(c) == 5
-    assert c.get(2) == 4
-    assert c.get(-1) == 8
-    with pytest.raises(IndexError):
-        c.get(5)
-
+@pytest.mark.parametrize("args, step, expected", [
+    ((10,), 2, [0, 2, 4, 6, 8]),
+    ((20,), 3, [0, 3, 6, 9, 12, 15, 18]),
+    ((30,), 5, [0, 5, 10, 15, 20, 25])
+])
+def test_step_range(args: tuple[int, ...], step: int, expected: list[int]):
+    stop = args[0]
+    c = indices_range(stop=stop, step=step)
+    assert len(c) == len(list(c)) == len(expected)
+    assert list(c) == expected
+    assert c.get(2) == 2 * step
+    assert c.get(-1) == (len(c) - 1) * step
+    with pytest.raises(OutOfRange):
+        c.get(len(c) + 2)
 
 def test_slice_range():
     d = indices_range(slice(2, 100, 10))
