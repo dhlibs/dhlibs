@@ -8,9 +8,10 @@ readme = "README.md"
 packages = [{ include = "dhlibs" }]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.9"
 
 [tool.poetry.group.dev.dependencies]
+ruff = "^0.6.3"
 pytest = "^8.3.2"
 tox = "^4.18.0"
 
@@ -47,6 +48,21 @@ typeCheckingMode = "strict"
 [tool.pytest.ini_options]
 cache_dir = ".cache/pytest"
 addopts = "--verbose"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py39,py310,py311
+
+[testenv]
+description = "run lint and tests"
+allowlist_externals = poetry
+commands_pre =
+    poetry install --no-root --sync
+commands =
+    poetry run ruff check dhlibs/
+    poetry run pytest --import-mode importlib
+"""
 
 [build-system]
 requires = ["poetry-core"]
