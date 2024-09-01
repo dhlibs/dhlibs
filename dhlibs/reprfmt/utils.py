@@ -25,9 +25,7 @@ def _is_class_deco_by_reprfmt(typ: type[object], /) -> bool:
 
     if not getattr(typ, "__use_reprfmt__", False):
         return False
-    if not isinstance(getattr(typ, "__repr__", None), ReprCallbackDescriptor):
-        return False
-    return True
+    return isinstance(getattr(typ, "__repr__", None), ReprCallbackDescriptor)
 
 
 _dispatcher = Dispatcher()
