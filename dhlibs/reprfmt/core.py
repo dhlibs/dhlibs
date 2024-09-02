@@ -1,4 +1,4 @@
-from typing import Optional
+from typing_extensions import Optional
 
 from dhlibs.reprfmt.formatters import FormatterFactoryCallable, FormatterProtocol
 from dhlibs.reprfmt.options import Options

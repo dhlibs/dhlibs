@@ -25,7 +25,8 @@
 """dhlibs.alias_callable - very simple module to create aliased callables"""
 
 from functools import wraps
-from typing import Callable, Optional, ParamSpec, TypeVar
+
+from typing_extensions import Callable, Optional, ParamSpec, TypeVar
 
 P = ParamSpec("P")
 T = TypeVar("T")

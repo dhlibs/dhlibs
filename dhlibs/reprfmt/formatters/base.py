@@ -1,7 +1,8 @@
 # pyright: strict
 
 import inspect
-from typing import Any, Optional, Protocol
+
+from typing_extensions import Any, Optional, Protocol
 
 from dhlibs.reprfmt.constants import MAX_RECURSIVE_RENDER_OBJLEVEL, NEVER_RENDER_TYPES
 from dhlibs.reprfmt.options import Options

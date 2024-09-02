@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional
+from typing_extensions import Any, Callable, Optional
 
 from dhlibs.reprfmt.formatters.base import BaseFormatterProtocol
 from dhlibs.reprfmt.formatters.default import DefaultFormatter
@@ -15,7 +15,7 @@ class CustomReprFuncFormatter(BaseFormatterProtocol):
     def __init__(
         self,
         *,
-        options: Options | None = None,
+        options: Optional[Options] = None,
         func: Optional[Callable[[Any, Options, int], str]] = None,
     ) -> None:
         super().__init__(options=options)

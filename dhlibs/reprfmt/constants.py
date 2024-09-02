@@ -1,5 +1,6 @@
 import types
-from typing import Callable, TypeVar
+
+from typing_extensions import Callable, TypeVar
 
 NEVER_RENDER_TYPES: tuple[type, ...] = (
     types.FunctionType,
