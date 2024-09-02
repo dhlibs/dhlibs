@@ -29,17 +29,19 @@ with support for slices, infinite ranges, and
 tuple-based ranges.
 """
 
+from functools import total_ordering
 from itertools import count
-from typing import Any, Iterable, Optional, TypeAlias, Union, cast, overload
+
+from typing_extensions import Any, Iterable, Optional, TypeAlias, Union, cast, overload
 
 from dhlibs.reprfmt import put_repr
 
-_IndicesArgsType: TypeAlias = tuple[int, ...] | slice
+_IndicesArgsType: TypeAlias = Union[tuple[int, ...], slice]
 
 _marker = put_repr(type("_marker", (), {}))()
 
 
-def _resolve_slice(s: slice) -> tuple[int, int | None, int]:
+def _resolve_slice(s: slice) -> tuple[int, Optional[int], int]:
     start = s.start
     stop = s.stop
     step = s.step
@@ -92,6 +94,7 @@ def _compute_range_length(start: int, stop: int, step: int) -> int:
 
 
 @put_repr
+@total_ordering
 class indices:
     """
     indices - flexible handling of index ranges
@@ -236,7 +239,7 @@ class indices:
     def __getitem__(self, index: int) -> int: ...
     @overload
     def __getitem__(self, index: _IndicesArgsType) -> "indices": ...
-    def __getitem__(self, index: int | _IndicesArgsType | Any) -> "int | indices":
+    def __getitem__(self, index: Union[int, _IndicesArgsType, Any]) -> Union[int, "indices"]:
         if isinstance(index, int):
             return self.get(index)
         elif isinstance(index, (slice, tuple)):
@@ -282,3 +285,36 @@ class indices:
         length = (stop - start + (step - 1 if step > 0 else step + 1)) // step
 
         return max(0, length)
+
+    def __hash__(self) -> int:
+        return hash(self._slice)
+
+    def __eq__(self, obj: object) -> bool:
+        if not isinstance(obj, indices):
+            return NotImplemented
+        return self._slice == obj._slice
+
+    def __le__(self, obj: object) -> bool:
+        if not isinstance(obj, indices):
+            return NotImplemented
+        if self.is_infinite:
+            cm = True
+        elif obj.is_infinite:
+            cm = False
+        if isinstance(self._slice, tuple):
+            if isinstance(obj._slice, tuple):
+                cm = len(self._slice) <= len(obj._slice)
+            else:
+                start, stop, step = _resolve_slice(obj._slice)
+                assert stop is not None
+                cm = len(self._slice) <= _compute_range_length(start, stop, step)
+        else:
+            start, stop, step = _resolve_slice(self._slice)
+            assert stop is not None
+            if isinstance(obj._slice, tuple):
+                cm = _compute_range_length(start, stop, step) <= len(obj._slice)
+            else:
+                ostart, ostop, ostep = _resolve_slice(obj._slice)
+                assert ostop
+                cm = _compute_range_length(start, stop, step) <= _compute_range_length(ostart, ostop, ostep)
+        return cm
