@@ -26,13 +26,14 @@
 from functools import partial, reduce
 from random import sample
 from threading import RLock as Lock
-from typing import Hashable, Optional
 
-from ._typings import AuditEvent, CacheInfo, KeyCallableType, OperatorCallableType
-from ._utils import determine_maxsize_args as _determine_maxsize_args
-from ._utils import keymaker
-from .audit import Auditer
-from .audit import audit as global_audit
+from typing_extensions import Hashable, Optional
+
+from dhlibs.cachedop._typings import AuditEvent, CacheInfo, KeyCallableType, OperatorCallableType
+from dhlibs.cachedop._utils import determine_maxsize_args as _determine_maxsize_args
+from dhlibs.cachedop._utils import keymaker
+from dhlibs.cachedop.audit import Auditer
+from dhlibs.cachedop.audit import audit as global_audit
 
 
 class _cachemap:

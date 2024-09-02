@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing_extensions import Any, Union
 
 from dhlibs.reprfmt.constants import T
 

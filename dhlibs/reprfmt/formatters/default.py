@@ -1,5 +1,5 @@
-from ..options import Options
-from .base import BaseFormatterProtocol
+from dhlibs.reprfmt.formatters.base import BaseFormatterProtocol
+from dhlibs.reprfmt.options import Options
 
 
 class DefaultFormatter(BaseFormatterProtocol):

@@ -23,9 +23,9 @@
 # SOFTWARE.
 
 
-from typing import Hashable, Optional
+from typing_extensions import Hashable, Optional
 
-from ._typings import KeyCallableType
+from dhlibs.cachedop._typings import KeyCallableType
 
 
 class keymaker:

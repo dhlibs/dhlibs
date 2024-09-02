@@ -22,9 +22,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Any, Mapping
+from typing_extensions import Any, Mapping
 
-from ._typings import AuditCallableType, AuditEvent, AuditEvents
+from dhlibs.cachedop._typings import AuditCallableType, AuditEvent, AuditEvents
 
 class Auditer:
     def register(self, callback: AuditCallableType, on_events: AuditEvents = None) -> None: ...
