@@ -1,4 +1,4 @@
-from typing import Any, Hashable, Mapping, Sequence, cast
+from typing_extensions import Any, Hashable, Mapping, Sequence, cast
 
 from dhlibs.reprfmt.formatters.base import BaseFormatterProtocol
 from dhlibs.reprfmt.options import Options
@@ -24,7 +24,7 @@ class OnRecursiveFormatter(BaseFormatterProtocol):
             return None
 
     def _real_format(self, obj: object, /, *, options: Options, objlevel: int) -> str:
-        from ..utils import pick_formatter
+        from dhlibs.reprfmt.utils import pick_formatter
 
         if isinstance(obj, (str, int, bytes, bool, type(None))):
             return pick_formatter(obj, fallback=BuiltinsReprFormatter, options=self.options)._real_format(

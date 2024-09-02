@@ -25,7 +25,8 @@
 
 from collections import defaultdict
 from enum import Enum, auto
-from typing import Any, Callable, Hashable, NamedTuple, Optional, Sequence, TypeAlias, Union
+
+from typing_extensions import Any, Callable, Hashable, NamedTuple, Optional, Sequence, TypeAlias, Union
 
 
 class AuditEvent(Enum):

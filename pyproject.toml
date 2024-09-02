@@ -9,6 +9,7 @@ packages = [{ include = "dhlibs" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+typing-extensions = "^4.12.2"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6.3"
@@ -17,18 +18,25 @@ tox = "^4.18.0"
 
 [tool.ruff]
 cache-dir = ".cache/ruff"
-indent-width = 4  # Force 4 spaces per indentation level
-line-length = 120 # Set maximum line length to 100 characters
-
-[tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = "all"
+indent-width = 4          # Force 4 spaces per indentation level
+line-length = 120         # Set maximum line length to 100 characters
 
 [tool.ruff.lint]
 # List of error codes to ignore
 # Select specific classes of rules to apply
-select = ["E", "W", "F", "I", "B", "C4", "ARG", "SIM", "PTH", "PL"]
-
-
+select = [
+    "E",
+    "W",
+    "F",
+    "I",
+    "B",
+    "C4",
+    "ARG",
+    "SIM",
+    "PTH",
+    "PL",
+    "TID",
+]
 ignore = [
     "W291",    # Trailing whitespace
     "E501",    # Line too long
@@ -40,6 +48,11 @@ ignore = [
     "PLR0913", # Too many arguments
     "B010",    # setattr
 ]
+
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+banned-api."typing".msg = "Use typing_extensions instead"
 
 [tool.pyright]
 # strict for absoulte clean code™

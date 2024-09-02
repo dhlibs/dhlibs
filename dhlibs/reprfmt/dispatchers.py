@@ -1,4 +1,4 @@
-from typing import Optional, Union, get_origin
+from typing_extensions import Optional, Union, get_origin
 
 from dhlibs.reprfmt.constants import DispatchPredCallback
 from dhlibs.reprfmt.formatters.base import FormatterFactoryCallable

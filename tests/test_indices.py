@@ -123,3 +123,46 @@ def test_copy():
     copy_e = e.copy()
     assert list(e) == list(copy_e)
     assert e is not copy_e
+
+def test_eq_indices():
+    a = indices_range()
+    b = indices_range()
+    assert a == b
+
+
+def test_ne_indices():
+    a = indices_range()
+    b = indices_range(10)
+    assert a != b
+
+
+def test_gt_indices():
+    a = indices_range(1000)
+    b = indices_range(100)
+    assert a > b
+
+
+def test_ge_indices_equal():
+    a = indices_range(stop=1000, step=10)
+    b = indices_range(stop=1000, step=10)
+    c = indices_range(stop=1000, step=20)
+    assert a >= b
+    assert a >= c
+
+
+def test_lt_indices():
+    a = indices_range(stop=100, step=20)
+    b = indices_range(stop=1000, step=10)
+    assert a < b
+
+
+def test_le_indices_equal():
+    a = indices_range(100)
+    b = indices_range(100)
+    assert a <= b
+
+
+def test_reverse():
+    a = indices_range(100)
+    b = a.reverse()
+    assert list(b) == list(reversed(a))
