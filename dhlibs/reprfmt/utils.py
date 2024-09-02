@@ -1,8 +1,7 @@
 # pyright: strict
 
 from inspect import getfile, getmodulename
-
-from typing_extensions import TYPE_CHECKING, Mapping, Optional, Sequence, Union, cast
+from typing import TYPE_CHECKING, Mapping, Optional, Sequence, Union, cast
 
 from dhlibs.reprfmt.formatters.base import FormatterFactoryCallable, FormatterProtocol
 from dhlibs.reprfmt.formatters.default import DefaultFormatter
@@ -22,7 +21,7 @@ from dhlibs.reprfmt.dispatchers import Dispatcher
 
 
 def _is_class_deco_by_reprfmt(typ: type[object], /) -> bool:
-    from dhlibs.reprfmt.deco import ReprCallbackDescriptor
+    from .deco import ReprCallbackDescriptor
 
     if not getattr(typ, "__use_reprfmt__", False):
         return False

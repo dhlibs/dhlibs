@@ -1,4 +1,4 @@
-from typing_extensions import Callable, Optional, Union, cast, overload
+from typing import Callable, Optional, Union, cast, overload
 
 from dhlibs.reprfmt.constants import T
 from dhlibs.reprfmt.dispatchers import Dispatcher

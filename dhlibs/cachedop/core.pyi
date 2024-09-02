@@ -22,11 +22,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing_extensions import Callable, Optional, Protocol, overload, type_check_only
+from typing import Callable, Optional, Protocol, overload, type_check_only
 
-from dhlibs.cachedop._typings import CacheInfo, KeyCallableType, OperatorCallableType
-from dhlibs.cachedop._utils import keymaker
-from dhlibs.cachedop.audit import Auditer
+from ._typings import CacheInfo, KeyCallableType, OperatorCallableType
+from ._utils import keymaker
+from .audit import Auditer
 
 __all__ = ["cached_opfunc"]
 

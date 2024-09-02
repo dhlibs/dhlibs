@@ -23,10 +23,10 @@
 # SOFTWARE.
 
 
-from typing_extensions import Any, Mapping
+from typing import Any, Mapping
 
-from dhlibs.alias_callable import alias_callable
-from dhlibs.cachedop._typings import AuditCallableType, AuditDefaultDict, AuditEvent, AuditEvents
+from ..alias_callable import alias_callable
+from ._typings import AuditCallableType, AuditDefaultDict, AuditEvent, AuditEvents
 
 
 def _resolve_events(events: AuditEvents) -> list[AuditEvent]:
