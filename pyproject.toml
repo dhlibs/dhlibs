@@ -82,8 +82,8 @@ commands_pre =
     poetry install --no-root --sync
 commands = 
     poetry run ruff check dhlibs/
-    poetry run pytest --import-mode importlib
     poetry run pyright dhlibs/
+    poetry run pytest --import-mode importlib
 """
 
 [build-system]
