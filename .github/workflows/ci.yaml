@@ -24,10 +24,8 @@ jobs:
 
       - name: Install poetry
         run: |
-          export POETRY_HOME=/tmp/poetry
-          python3 -m venv $POETRY_HOME
-          $POETRY_HOME/bin/pip install poetry
-          echo "${POETRY_HOME}/bin" >> $GITHUB_PATH
+          pip install --upgrade pip
+          pip install poetry
 
       - name: Install dependencies
         run: |
