@@ -1,9 +1,6 @@
 repos:
-  - repo: local
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.3
     hooks:
-      - id: tox
-        name: Run Tox
-        entry: tox
-        language: system
-        types: [python]
-
+        - id: ruff
+        - id: ruff-format
