@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: tox
+        name: Run Tox
+        entry: tox
+        language: system
+        types: [python]
+
