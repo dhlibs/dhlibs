@@ -1,0 +1,37 @@
+name: "test and linting"
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+jobs:
+  tox:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.9", "3.10", "3.11"]
+    steps:
+      - name: check code
+        uses: actions/checkout@v4
+
+      - name: setup python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install poetry
+        run: |
+          export POETRY_HOME=/opt/poetry
+          python3 -m venv $POETRY_HOME
+          $POETRY_HOME/bin/pip install poetry
+          echo "${POETRY_HOME}/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          poetry install
+
+      - name: Run tox
+        run: poetry run tox

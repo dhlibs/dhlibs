@@ -15,6 +15,8 @@ typing-extensions = "^4.12.2"
 ruff = "^0.6.3"
 pytest = "^8.3.2"
 tox = "^4.18.0"
+tox-gh-actions = "^3.2.0"
+pyright = "^1.1.378"
 
 [tool.ruff]
 cache-dir = ".cache/ruff"
@@ -67,13 +69,20 @@ legacy_tox_ini = """
 [tox]
 envlist = py39,py310,py311
 
+[gh-actions]
+python = 
+    3.9: py39
+    3.10: py310
+    3.11: py311
+
 [testenv]
 description = "run lint and tests"
 allowlist_externals = poetry
 commands_pre =
     poetry install --no-root --sync
-commands =
+commands = 
     poetry run ruff check dhlibs/
+    poetry run pyright dhlibs/
     poetry run pytest --import-mode importlib
 """
 
