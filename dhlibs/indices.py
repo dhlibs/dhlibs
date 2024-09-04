@@ -32,7 +32,20 @@ tuple-based ranges.
 from functools import total_ordering
 from itertools import count
 
-from typing_extensions import Any, Iterable, Optional, TypeAlias, Union, cast, overload
+from more_itertools import first
+from typing_extensions import (
+    Any,
+    Iterable,
+    Literal,
+    Mapping,
+    NotRequired,
+    Optional,
+    TypeAlias,
+    TypedDict,
+    Union,
+    cast,
+    overload,
+)
 
 from dhlibs.reprfmt import put_repr
 
@@ -41,7 +54,23 @@ _IndicesArgsType: TypeAlias = Union[tuple[int, ...], slice]
 _marker = put_repr(type("_marker", (), {}))()
 
 
-def _resolve_slice(s: slice) -> tuple[int, Optional[int], int]:
+class BaseIndicesException(Exception):
+    pass
+
+
+class OutOfRange(BaseIndicesException):
+    pass
+
+
+class GotInfiniteRange(BaseIndicesException):
+    pass
+
+
+class NoRangeFound(BaseIndicesException):
+    pass
+
+
+def _resolve_slice(s: slice) -> tuple[int, int | None, int]:
     start = s.start
     stop = s.stop
     step = s.step
@@ -49,16 +78,14 @@ def _resolve_slice(s: slice) -> tuple[int, Optional[int], int]:
         start = 0
     if step is None:
         step = 1
-    if stop is not None:
-        stop = int(stop)
-    return int(start), stop, int(step)
+    return start, stop, step
 
 
 def _make_niter_from_slice(s: slice) -> Iterable[int]:
     start, stop, step = _resolve_slice(s)
     if stop is None:
         if step < 0:
-            raise IndexError("negative step index without stop limit is not supported")
+            raise GotInfiniteRange("negative step index without stop limit is not supported")
         r = count(start, step)
     else:
         r = range(start, stop, step)
@@ -68,6 +95,8 @@ def _make_niter_from_slice(s: slice) -> Iterable[int]:
 def _resolve_indices_args(args: tuple[Any, ...], kwargs: dict[str, Any]) -> _IndicesArgsType:
     start, stop, step = [_marker] * 3
     argdict = dict(enumerate(args))
+    kwargs = kwargs.copy()
+    kwargs.pop("_ref", None)
 
     if len(argdict) == 1 and not kwargs:
         value = argdict[0]
@@ -91,6 +120,27 @@ def _resolve_indices_args(args: tuple[Any, ...], kwargs: dict[str, Any]) -> _Ind
 
 def _compute_range_length(start: int, stop: int, step: int) -> int:
     return (stop - start + (step - 1 if step > 0 else step + 1)) // step
+
+
+class SliceData(TypedDict):
+    start: int
+    stop: Optional[int]
+    step: int
+
+
+class IndicesSliceData(TypedDict):
+    type: Literal["slice"]
+    slice: SliceData
+
+
+class IndicesIndexesTupleData(TypedDict):
+    type: Literal["indexes"]
+    values: list[int]
+
+
+class IndicesRangeData(TypedDict):
+    slice: IndicesSliceData | IndicesIndexesTupleData
+    ref: NotRequired["IndicesRangeData"]
 
 
 @put_repr
@@ -120,7 +170,7 @@ class indices:
     - __len__: Compute the length of the range.
     """
 
-    __slots__ = ("_slice",)
+    __slots__ = ("_slice", "_iter", "_ref")
 
     @overload
     def __init__(self) -> None: ...
@@ -134,17 +184,21 @@ class indices:
     def __init__(self, s: tuple[int, ...], /) -> None: ...
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self._slice = _resolve_indices_args(args, kwargs)
+        self._ref: Optional[indices] = kwargs.get("_ref")
+        self._iter = None
 
     def values(self) -> Iterable[int]:
         """Get the values."""
-        if isinstance(self._slice, tuple):
-            return map(self.get, self._slice)
-        return _make_niter_from_slice(self._slice)
+        if isinstance(self._slice, slice):
+            it = _make_niter_from_slice(self._slice)
+            return map(self._ref.get, it) if self._ref else it
+        return map(self.get, range(len(self._slice)))
 
     def contains(self, item: int) -> bool:
         """Return True if item within range, else False"""
         if isinstance(self._slice, tuple):
-            return item in self._slice
+            # not the fastest way, but is the most efficient
+            return first(filter(lambda x: x == item, self.values()), None) is not None
         else:
             start, stop, step = _resolve_slice(self._slice)
             # efficiency™
@@ -159,23 +213,24 @@ class indices:
 
     def get(self, index: int) -> int:
         """Get a item from `index`."""
-        index = int(index)
         if isinstance(self._slice, tuple):
-            return self._slice[index]
+            if self._ref is None:
+                raise NoRangeFound("no slice range cannot been found assoicated with this range")
+            return self._ref.get(self._slice[index])
 
         start, stop, step = _resolve_slice(self._slice)
         if stop is None:
             if index < 0:
-                raise IndexError("negative indices without stop limit is not supported")
+                raise GotInfiniteRange("negative indices without stop limit is not supported")
             if step < 0:
-                raise IndexError("negative step index without stop limit is not supported")
+                raise GotInfiniteRange("negative step index without stop limit is not supported")
             final_index = start + (index * step)
         else:
             range_length = _compute_range_length(start, stop, step)
             if index < 0:
                 index += range_length
             if index < 0 or index >= range_length:
-                raise IndexError("index out of range")
+                raise OutOfRange("index out of range")
             final_index = start + index * step
         return final_index
 
@@ -192,54 +247,53 @@ class indices:
     def indices(self, *args: Any, **kwargs: Any) -> "indices":
         """Slice the range."""
         new_slice = _resolve_indices_args(args, kwargs)
-        if isinstance(new_slice, tuple):
-            d = tuple(self.get(i) for i in new_slice)
-            return self.__class__(d)
-        elif isinstance(self._slice, tuple):
-            return self.__class__(self._slice[new_slice])
+
+        if isinstance(new_slice, tuple) or isinstance(self._slice, tuple):
+            return self.__class__(new_slice, _ref=self)  # pyright: ignore[reportCallIssue]
+
+        ostart, ostop, ostep = _resolve_slice(self._slice)
+        nstart, nstop, nstep = _resolve_slice(new_slice)
+        fstart = ostart + (nstart * ostep)
+        fstep = ostep * nstep
+        if ostop is None and nstop is None:
+            final_slice = slice(fstart, None, fstep)
+        elif nstop is None:
+            final_slice = slice(fstart, ostop, fstep)
         else:
-            original_slice_start, original_slice_stop, original_slice_step = _resolve_slice(self._slice)
-            new_slice_start, new_slice_stop, new_slice_step = _resolve_slice(new_slice)
-            final_slice_start = original_slice_start + (new_slice_start * original_slice_step)
-            final_slice_step = original_slice_step * new_slice_step
-            if original_slice_stop is None and new_slice_stop is None:
-                final_slice = slice(final_slice_start, None, final_slice_step)
-            elif new_slice_stop is None:
-                final_slice = slice(final_slice_start, original_slice_stop, final_slice_step)
-            else:
-                nstop = original_slice_start + (new_slice_stop * original_slice_step)
-                final_slice = slice(final_slice_start, nstop, final_slice_step)
-            fstart, fstop, fstep = _resolve_slice(final_slice)
-            if fstop is None:
-                return self.__class__(final_slice)
-            plength = _compute_range_length(fstart, fstop, fstep)
-            if not self.is_infinite and plength >= len(self):
-                return self
+            fstop = ostart + (nstop * ostep)
+            final_slice = slice(fstart, fstop, fstep)
+        fstart, fstop, fstep = _resolve_slice(final_slice)
+        if fstop is None:
             return self.__class__(final_slice)
+        plength = _compute_range_length(fstart, fstop, fstep)
+        if not self.is_infinite and plength >= len(self):
+            return self
+        return self.__class__(final_slice)
 
     def reverse(self) -> "indices":
         """Reverse the range."""
         if isinstance(self._slice, tuple):
-            return self.__class__(tuple(reversed(self._slice)))
+            return self.__class__(tuple(reversed(self._slice)), _ref=self._ref)  # pyright: ignore[reportCallIssue]
 
         start, stop, step = _resolve_slice(self._slice)
 
         if stop is None:
             raise ValueError("Cannot reverse an infinite range")
 
-        # Calculate the new start, stop, and step for the reversed range
-        # The last element in the reversed range should be the last element of the original range
         new_start = stop - ((stop - start) % step or step)
         new_stop = start - step
         new_step = -step
 
         return self.__class__(slice(new_start, new_stop, new_step))
 
+    def __reversed__(self):
+        return self.reverse()
+
     @overload
     def __getitem__(self, index: int) -> int: ...
     @overload
     def __getitem__(self, index: _IndicesArgsType) -> "indices": ...
-    def __getitem__(self, index: Union[int, _IndicesArgsType, Any]) -> Union[int, "indices"]:
+    def __getitem__(self, index: int | _IndicesArgsType | Any) -> "int | indices":
         if isinstance(index, int):
             return self.get(index)
         elif isinstance(index, (slice, tuple)):
@@ -251,7 +305,16 @@ class indices:
         return self.contains(index)
 
     def __iter__(self):
-        return iter(self.values())
+        return self
+
+    def __next__(self) -> int:
+        if self._iter is None:
+            self._iter = iter(self.values())
+        try:
+            return next(self._iter)
+        except StopIteration:
+            self._iter = iter(self.values())
+            raise
 
     @property
     def slice(self) -> _IndicesArgsType:
@@ -263,16 +326,46 @@ class indices:
         """Return True if the range is infinite, else False"""
         return not isinstance(self._slice, tuple) and self._slice.stop is None
 
+    @property
+    def reference(self) -> Optional["indices"]:
+        """The reference of another `indices`, mostly use handling tuple-based slices."""
+        return self._ref
+
     def copy(self) -> "indices":
         """Copy the range."""
-        return self.__class__(self._slice)
+        return self.__class__(self._slice, _ref=self._ref)  # pyright: ignore[reportCallIssue]
 
-    def __copy__(self) -> "indices":
-        return self.copy()
+    def for_json(self) -> IndicesRangeData:
+        """Convert object to Python dictionary"""
+        if isinstance(self._slice, tuple):
+            slice_data = IndicesIndexesTupleData(type="indexes", values=list(self._slice))
+        else:
+            start, stop, step = _resolve_slice(self._slice)
+            slice_data = IndicesSliceData(type="slice", slice=SliceData(start=start, stop=stop, step=step))
+        d = IndicesRangeData(slice=slice_data)
+        if self._ref:
+            d["ref"] = self._ref.for_json()
+        return d
+
+    @classmethod
+    def from_json(cls, data: Mapping[str, Any]) -> "indices":
+        """Create `indices` from a Python dictionary"""
+        self = object.__new__(cls)
+        self._ref = None
+        if ref := data.get("ref"):
+            self._ref = cls.from_json(ref)
+        slice_data = data["slice"]
+        if slice_data["type"] == "indexes":
+            self._slice = tuple(slice_data["values"])
+        elif slice_data["type"] == "slice":
+            sdata = slice_data["slice"]
+            self._slice = slice(sdata["start"], sdata["stop"], sdata["step"])
+        self._iter = None
+        return self
 
     def __len__(self) -> int:
         if self.is_infinite:
-            raise ValueError("cannot compute length of an infinite range")
+            raise GotInfiniteRange("cannot compute length of an infinite range")
 
         if isinstance(self._slice, tuple):
             return len(self._slice)
@@ -292,7 +385,11 @@ class indices:
     def __eq__(self, obj: object) -> bool:
         if not isinstance(obj, indices):
             return NotImplemented
-        return self._slice == obj._slice
+        if self._slice != obj._slice:
+            return False
+        if self._ref is None:
+            return obj._ref is None
+        return self._ref == obj._ref
 
     def __le__(self, obj: object) -> bool:
         if not isinstance(obj, indices):
