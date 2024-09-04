@@ -3,9 +3,6 @@ on:
   push:
     branches:
       - dev
-  pull_request:
-    branches:
-      - dev
 jobs:
   tox:
     runs-on: ${{ matrix.os }}
@@ -24,10 +21,8 @@ jobs:
 
       - name: Install poetry
         run: |
-          export POETRY_HOME=/opt/poetry
-          python3 -m venv $POETRY_HOME
-          $POETRY_HOME/bin/pip install poetry
-          echo "${POETRY_HOME}/bin" >> $GITHUB_PATH
+          pip install --upgrade pip
+          pip install poetry
 
       - name: Install dependencies
         run: |
