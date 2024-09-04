@@ -29,6 +29,8 @@ with support for slices, infinite ranges, and
 tuple-based ranges.
 """
 
+from __future__ import annotations
+
 from functools import total_ordering
 from itertools import count
 
@@ -70,7 +72,7 @@ class NoRangeFound(BaseIndicesException):
     pass
 
 
-def _resolve_slice(s: slice) -> tuple[int, int | None, int]:
+def _resolve_slice(s: slice) -> tuple[int, Optional[int], int]:
     start = s.start
     stop = s.stop
     step = s.step
@@ -139,8 +141,8 @@ class IndicesIndexesTupleData(TypedDict):
 
 
 class IndicesRangeData(TypedDict):
-    slice: IndicesSliceData | IndicesIndexesTupleData
-    ref: NotRequired["IndicesRangeData"]
+    slice: Union[IndicesSliceData, IndicesIndexesTupleData]
+    ref: NotRequired[IndicesRangeData]
 
 
 @put_repr
@@ -235,16 +237,16 @@ class indices:
         return final_index
 
     @overload
-    def indices(self) -> "indices": ...
+    def indices(self) -> indices: ...
     @overload
-    def indices(self, stop: int, /) -> "indices": ...
+    def indices(self, stop: int, /) -> indices: ...
     @overload
-    def indices(self, start: int = 0, stop: Optional[int] = None, step: int = 1) -> "indices": ...
+    def indices(self, start: int = 0, stop: Optional[int] = None, step: int = 1) -> indices: ...
     @overload
-    def indices(self, s: slice, /) -> "indices": ...
+    def indices(self, s: slice, /) -> indices: ...
     @overload
-    def indices(self, s: tuple[int, ...], /) -> "indices": ...
-    def indices(self, *args: Any, **kwargs: Any) -> "indices":
+    def indices(self, s: tuple[int, ...], /) -> indices: ...
+    def indices(self, *args: Any, **kwargs: Any) -> indices:
         """Slice the range."""
         new_slice = _resolve_indices_args(args, kwargs)
 
@@ -270,7 +272,7 @@ class indices:
             return self
         return self.__class__(final_slice)
 
-    def reverse(self) -> "indices":
+    def reverse(self) -> indices:
         """Reverse the range."""
         if isinstance(self._slice, tuple):
             return self.__class__(tuple(reversed(self._slice)), _ref=self._ref)  # pyright: ignore[reportCallIssue]
@@ -292,8 +294,8 @@ class indices:
     @overload
     def __getitem__(self, index: int) -> int: ...
     @overload
-    def __getitem__(self, index: _IndicesArgsType) -> "indices": ...
-    def __getitem__(self, index: int | _IndicesArgsType | Any) -> "int | indices":
+    def __getitem__(self, index: _IndicesArgsType) -> indices: ...
+    def __getitem__(self, index: Union[int, _IndicesArgsType, Any]) -> Union[int, indices]:
         if isinstance(index, int):
             return self.get(index)
         elif isinstance(index, (slice, tuple)):
@@ -327,11 +329,11 @@ class indices:
         return not isinstance(self._slice, tuple) and self._slice.stop is None
 
     @property
-    def reference(self) -> Optional["indices"]:
+    def reference(self) -> Optional[indices]:
         """The reference of another `indices`, mostly use handling tuple-based slices."""
         return self._ref
 
-    def copy(self) -> "indices":
+    def copy(self) -> indices:
         """Copy the range."""
         return self.__class__(self._slice, _ref=self._ref)  # pyright: ignore[reportCallIssue]
 
@@ -348,7 +350,7 @@ class indices:
         return d
 
     @classmethod
-    def from_json(cls, data: Mapping[str, Any]) -> "indices":
+    def from_json(cls, data: Mapping[str, Any]) -> indices:
         """Create `indices` from a Python dictionary"""
         self = object.__new__(cls)
         self._ref = None
