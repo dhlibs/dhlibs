@@ -64,7 +64,7 @@ typeCheckingMode = "strict"
 
 [tool.pytest.ini_options]
 cache_dir = ".cache/pytest"
-addopts = "--verbose"
+addopts = "--verbose --import-mode importlib"
 
 [tool.tox]
 legacy_tox_ini = """
@@ -85,8 +85,12 @@ commands_pre =
 commands = 
     poetry run ruff check dhlibs/
     poetry run pyright dhlibs/
-    poetry run pytest --import-mode importlib
+    poetry run coverage run -m pytest
+    poetry run coverage report -m
 """
+
+[tool.coverage.report]
+omit = ["dhlibs/reprfmt/*", "dhlibs/cachedop/*", "tests/*"]
 
 [build-system]
 requires = ["poetry-core"]
