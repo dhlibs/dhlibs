@@ -24,23 +24,12 @@ coverage = "^7.6.1"
 cache-dir = ".cache/ruff"
 indent-width = 4          # Force 4 spaces per indentation level
 line-length = 120         # Set maximum line length to 100 characters
+target-version = "py39"
 
 [tool.ruff.lint]
 # List of error codes to ignore
 # Select specific classes of rules to apply
-select = [
-    "E",
-    "W",
-    "F",
-    "I",
-    "B",
-    "C4",
-    "ARG",
-    "SIM",
-    "PTH",
-    "PL",
-    "TID",
-]
+select = ["C", "E", "W", "F", "I", "B", "C4", "ARG", "SIM", "PTH", "PL", "TID"]
 ignore = [
     "W291",    # Trailing whitespace
     "E501",    # Line too long
@@ -52,6 +41,9 @@ ignore = [
     "PLR0913", # Too many arguments
     "B010",    # setattr
 ]
+
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
 
 
 [tool.ruff.lint.flake8-tidy-imports]
