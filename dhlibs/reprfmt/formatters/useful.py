@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing_extensions import Any, Callable, Optional
 
 from dhlibs.reprfmt.formatters.base import BaseFormatterProtocol

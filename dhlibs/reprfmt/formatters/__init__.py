@@ -1,4 +1,5 @@
 # pyright: strict
+from __future__ import annotations
 
 from dhlibs.reprfmt.formatters.base import BaseFormatterProtocol, FormatterFactoryCallable, FormatterProtocol
 from dhlibs.reprfmt.formatters.default import DefaultFormatter

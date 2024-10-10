@@ -21,6 +21,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+from __future__ import annotations
 
 import pytest
 
@@ -116,16 +117,19 @@ def test_indices_subrange():
     subrange = e.indices(slice(1, 4))
     assert list(subrange) == [20, 30, 40]
 
+
 def test_indices_subrange_advanced():
     e = indices(start=10, stop=100, step=10)
     subrange = e.indices(slice(1, None, 2))
     assert list(subrange[:3]) == [20, 40, 60]
     assert list(subrange[:20][:3]) == [20, 40, 60]
 
+
 def test_getitem_fail():
     e = indices()
     with pytest.raises(TypeError):
-        e[None] # type: ignore
+        e[None]  # type: ignore
+
 
 def test_contains():
     e = indices(start=10, stop=100, step=10)

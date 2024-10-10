@@ -1,4 +1,5 @@
 # pyright: strict
+from __future__ import annotations
 
 from inspect import getfile, getmodulename
 

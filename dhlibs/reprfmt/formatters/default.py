@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dhlibs.reprfmt.formatters.base import BaseFormatterProtocol
 from dhlibs.reprfmt.options import Options
 
