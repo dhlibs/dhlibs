@@ -24,7 +24,7 @@
 
 import pytest
 
-from dhlibs.indices import GotInfiniteRange, OutOfRange, indices
+from dhlibs.indices import GotInfiniteRange, NoRangeFound, OutOfRange, indices
 
 JSON_DATA = {
     "slice": {"type": "slice", "slice": {"start": 0, "stop": 2, "step": 1}},
@@ -90,10 +90,16 @@ def test_large_step_range():
 def test_infinite_range():
     f = indices(start=10, step=20)
     assert list(f[:5]) == [10, 30, 50, 70, 90]
+    assert f[::2].get(100) == 4010
+    assert f[::1][10] == 210
     with pytest.raises(GotInfiniteRange):
         len(f)
     with pytest.raises(GotInfiniteRange):
         f.get(-1)
+    with pytest.raises(GotInfiniteRange):
+        next(f[::-1])
+    with pytest.raises(GotInfiniteRange):
+        f.reverse()
 
 
 def test_reverse_range():
@@ -110,6 +116,16 @@ def test_indices_subrange():
     subrange = e.indices(slice(1, 4))
     assert list(subrange) == [20, 30, 40]
 
+def test_indices_subrange_advanced():
+    e = indices(start=10, stop=100, step=10)
+    subrange = e.indices(slice(1, None, 2))
+    assert list(subrange[:3]) == [20, 40, 60]
+    assert list(subrange[:20][:3]) == [20, 40, 60]
+
+def test_getitem_fail():
+    e = indices()
+    with pytest.raises(TypeError):
+        e[None] # type: ignore
 
 def test_contains():
     e = indices(start=10, stop=100, step=10)
@@ -220,6 +236,14 @@ def test_tuple_reverse():
     b = a[10, 20, 45].reverse()
     assert b == a[45, 20, 10]
     assert list(b) == list(a[45, 20, 10]) == [90, 40, 20]
+
+
+def test_tuple_noref():
+    a = indices((0, 1, 2))
+    with pytest.raises(NoRangeFound):
+        list(a)
+    with pytest.raises(GotInfiniteRange):
+        a[::-1].get(1)
 
 
 def test_new_slice_impl():

@@ -280,7 +280,7 @@ class indices:
         start, stop, step = _resolve_slice(self._slice)
 
         if stop is None:
-            raise ValueError("Cannot reverse an infinite range")
+            raise GotInfiniteRange("Cannot reverse an infinite range")
 
         new_start = stop - ((stop - start) % step or step)
         new_stop = start - step
@@ -301,7 +301,7 @@ class indices:
         elif isinstance(index, (slice, tuple)):
             return self.indices(index)
         else:
-            return NotImplemented
+            raise TypeError(f"expecting int, slice or tuple, got {self.__class__.__name__}")
 
     def __contains__(self, index: int) -> bool:
         return self.contains(index)
