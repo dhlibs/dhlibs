@@ -81,9 +81,6 @@ commands =
     poetry run coverage report -m
 """
 
-[tool.coverage.report]
-omit = ["dhlibs/reprfmt/*", "dhlibs/cachedop/*", "tests/*"]
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
