@@ -24,6 +24,8 @@
 
 """dhlibs.alias_callable - very simple module to create aliased callables"""
 
+from __future__ import annotations
+
 from functools import wraps
 
 from typing_extensions import Callable, Optional, ParamSpec, TypeVar

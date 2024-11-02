@@ -25,6 +25,8 @@
 
 """dhlibs.cachedop - caching function for binary oprations"""
 
+from __future__ import annotations
+
 from dhlibs.cachedop._typings import AuditEvent
 from dhlibs.cachedop.audit import Auditer, register_audit_callback
 from dhlibs.cachedop.core import cached_opfunc
