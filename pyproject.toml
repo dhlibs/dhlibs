@@ -18,28 +18,19 @@ pytest = "^8.3.2"
 tox = "^4.18.0"
 tox-gh-actions = "^3.2.0"
 pyright = "^1.1.378"
+coverage = "^7.6.1"
+tox-uv = "^1.16.0"
 
 [tool.ruff]
 cache-dir = ".cache/ruff"
 indent-width = 4          # Force 4 spaces per indentation level
 line-length = 120         # Set maximum line length to 100 characters
+target-version = "py39"
 
 [tool.ruff.lint]
 # List of error codes to ignore
 # Select specific classes of rules to apply
-select = [
-    "E",
-    "W",
-    "F",
-    "I",
-    "B",
-    "C4",
-    "ARG",
-    "SIM",
-    "PTH",
-    "PL",
-    "TID",
-]
+select = ["C", "E", "W", "F", "I", "B", "C4", "ARG", "SIM", "PTH", "PL", "TID"]
 ignore = [
     "W291",    # Trailing whitespace
     "E501",    # Line too long
@@ -52,6 +43,9 @@ ignore = [
     "B010",    # setattr
 ]
 
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
+
 
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
@@ -60,31 +54,49 @@ banned-api."typing".msg = "Use typing_extensions instead"
 [tool.pyright]
 # strict for absoulte clean code™
 typeCheckingMode = "strict"
+pythonVersion = "3.9"
 
 [tool.pytest.ini_options]
 cache_dir = ".cache/pytest"
-addopts = "--verbose"
+addopts = "--verbose --import-mode importlib"
 
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py39,py310,py311
+toxworkdir = .cache/tox
+envlist = py{39,310,311,312,313}, typecheck, lint
 
 [gh-actions]
 python = 
     3.9: py39
     3.10: py310
-    3.11: py311
+    3.11: py311, typecheck, lint
+    3.12: py312
+    3.13: py313
 
 [testenv]
-description = "run lint and tests"
+description = "Run tests with coverage"
 allowlist_externals = poetry
 commands_pre =
     poetry install --no-root --sync
 commands = 
+    poetry run coverage run -m pytest
+
+[testenv:lint]
+description = "Run code linting with ruff"
+allowlist_externals = poetry
+basepython = py311
+skip_install = true  # Skip package install as only linting is needed
+commands =
     poetry run ruff check dhlibs/
+
+[testenv:typecheck]
+description = "run pyright"
+allowlist_externals = poetry
+basepython = py311
+skip_install = true  # Skip package install as only type checking is needed
+commands =
     poetry run pyright dhlibs/
-    poetry run pytest --import-mode importlib
 """
 
 [build-system]
