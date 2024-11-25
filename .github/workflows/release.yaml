@@ -1,0 +1,39 @@
+name: Publish release to GitHub and PyPI
+
+on:
+  push:
+    tags: ["*.*.*"] # <major>.<minor>.<micro>
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get source code
+        uses: actions/checkout@v4
+      - name: Release
+        uses: softprops/action-gh-release@v2.1.0
+
+  deploy:
+    needs: [release]
+    runs-on: ubuntu-latest
+    environment: pypi-publish
+    permissions:
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11"
+    - name: Install dependencies
+      run: pip install poetry
+    - name: Build package
+      run: |
+        poetry install
+        poetry build
+    - name: Publish package
+      uses: pypa/gh-action-pypi-publish@v1.12.2
