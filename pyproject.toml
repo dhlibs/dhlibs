@@ -51,6 +51,9 @@ required-imports = ["from __future__ import annotations"]
 ban-relative-imports = "all"
 banned-api."typing".msg = "Use typing_extensions instead"
 
+[tool.ruff.per-file-ignores]
+"dhlibs/__init__.py" = ["I002"]
+
 [tool.pyright]
 # strict for absoulte clean code™
 typeCheckingMode = "strict"
