@@ -28,10 +28,9 @@ from __future__ import annotations
 
 from functools import wraps
 
-from typing_extensions import Callable, Optional, ParamSpec, TypeVar
+from typing_extensions import Callable, Optional
 
-P = ParamSpec("P")
-T = TypeVar("T")
+from dhlibs._typing import P, T
 
 
 def alias_callable(
