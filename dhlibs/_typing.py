@@ -22,15 +22,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""dhlibs - random libraries that you shouldn't care"""
+"""Common typing types."""
 
-def _get_version():
-    import importlib.metadata
-    return importlib.metadata.version(__name__)
+from __future__ import annotations
 
-__author__ = "DinhHuy2010"
-__copyright__ = "Copyright (c) 2024 DinhHuy2010 (https://github.com/DinhHuy2010)"
-__license__ = "MIT"
-__version__ = _get_version()
+from typing_extensions import ParamSpec, TypeVar
 
-del _get_version
+P = ParamSpec("P")
+T = TypeVar("T")
