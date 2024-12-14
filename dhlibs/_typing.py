@@ -22,36 +22,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""dhlibs.alias_callable - very simple module to create aliased callables"""
+"""Common typing types."""
 
 from __future__ import annotations
 
-from functools import wraps
+from typing_extensions import ParamSpec, TypeVar
 
-from typing_extensions import Callable, Optional
-
-from dhlibs._typing import P, T
-
-
-def alias_callable(
-    callback: Callable[P, T],
-    name: str,
-    qualname: Optional[str] = None,
-    doc: Optional[str] = None,
-) -> Callable[P, T]:
-    if not callable(callback):
-        raise TypeError("'callback' is not callable")
-
-    @wraps(callback)
-    def _(*args: P.args, **kwargs: P.kwargs) -> T:
-        return callback(*args, **kwargs)
-
-    _.__name__ = name
-    if qualname is None:
-        t = callback.__qualname__[:]
-        _.__qualname__ = ".".join([*t.split(".")[:-1], name])
-    else:
-        _.__qualname__ = qualname
-    if doc is not None:
-        _.__doc__ = doc
-    return _
+P = ParamSpec("P")
+T = TypeVar("T")
