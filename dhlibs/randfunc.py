@@ -94,8 +94,8 @@ class _UniqueRandomCallback(Generic[P, T]):
             raise TypeError(
                 f"expecting 'func' is callable, got {func.__class__.__name__}"
             )
-        if tries is not None and tries < 1:
-            raise ValueError("tries must be 1 or higher")
+        if tries is not None and tries <= 0:
+            raise ValueError("tries cannot be 0 or below")
 
         self.__wrapped__ = func
         self._memo: set[T] = set()
