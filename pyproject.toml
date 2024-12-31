@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dhlibs"
-version = "0.1.5"
+version = "0.1.6"
 description = "dhlibs - random libraries that you shouldn't care"
 authors = ["DinhHuy2010 <huy04052010@outlook.com>"]
 repository = "https://github.com/DinhHuy2010/dhlibs"
