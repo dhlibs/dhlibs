@@ -1,19 +1,23 @@
 # This file is part of dhlibs (https://github.com/DinhHuy2010/dhlibs)
-# 
-# MIT License
-# 
 # Copyright (c) 2024 DinhHuy2010 (https://github.com/DinhHuy2010)
-# 
+# SPDX-License-Identifier: MIT OR Apache-2.0 OR MPL-2.0
+
+# This file is part of dhlibs (https://github.com/DinhHuy2010/dhlibs)
+#
+# MIT License
+#
+# Copyright (c) 2024 DinhHuy2010 (https://github.com/DinhHuy2010)
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,13 +39,14 @@ from dhlibs._typing import P, T
 
 __all__ = ["make_rf_unique"]
 
+
 class _MemoInfo(NamedTuple):
     size: int
     hits: int
     misses: int
 
-_MemoInfo.__name__ = "MemoInfo"
 
+_MemoInfo.__name__ = "MemoInfo"
 
 
 class NoNewValueFound(ValueError):
@@ -51,10 +56,13 @@ class NoNewValueFound(ValueError):
     This exception is triggered after the maximum number of tries has been
     exceeded without generating a unique value.
     """
+
     pass
 
 
-def _repeatfunc(func: Callable[..., T], times: int | None, args: tuple[Any, ...], kwargs: dict[str, Any]) -> Generator[T, None, None]:
+def _repeatfunc(
+    func: Callable[..., T], times: int | None, args: tuple[Any, ...], kwargs: dict[str, Any]
+) -> Generator[T, None, None]:
     yield from _miter_repeatfunc(partial(func, *args, **kwargs), times)
 
 
@@ -91,9 +99,7 @@ class _UniqueRandomCallback(Generic[P, T]):
 
     def __init__(self, func: Callable[P, T], /, *, tries: int | None = None) -> None:
         if not callable(func):
-            raise TypeError(
-                f"expecting 'func' is callable, got {func.__class__.__name__}"
-            )
+            raise TypeError(f"expecting 'func' is callable, got {func.__class__.__name__}")
         if tries is not None and tries <= 0:
             raise ValueError("tries cannot be 0 or below")
 
@@ -140,10 +146,9 @@ class _UniqueRandomCallback(Generic[P, T]):
                 self._hits += 1
         raise NoNewValueFound("no new value return from the callback")
 
+
 @overload
-def make_rf_unique(
-    callback: None = None, /
-) -> Callable[[Callable[P, T]], _UniqueRandomCallback[P, T]]: ...
+def make_rf_unique(callback: None = None, /) -> Callable[[Callable[P, T]], _UniqueRandomCallback[P, T]]: ...
 @overload
 def make_rf_unique(
     callback: None = None, /, *, tries: int | None = ...
@@ -153,7 +158,10 @@ def make_rf_unique(callback: Callable[P, T], /) -> _UniqueRandomCallback[P, T]: 
 @overload
 def make_rf_unique(callback: Callable[P, T], /, *, tries: int = ...) -> _UniqueRandomCallback[P, T]: ...
 
-def make_rf_unique(callback: Callable[P, T] | None = None, /, *, tries: int | None = None) -> _UniqueRandomCallback[P, T] | Callable[[Callable[P, T]], _UniqueRandomCallback[P, T]]:
+
+def make_rf_unique(
+    callback: Callable[P, T] | None = None, /, *, tries: int | None = None
+) -> _UniqueRandomCallback[P, T] | Callable[[Callable[P, T]], _UniqueRandomCallback[P, T]]:
     """
     Creates a unique random callback using `_UniqueRandomCallback`.
 
@@ -193,11 +201,10 @@ def make_rf_unique(callback: Callable[P, T] | None = None, /, *, tries: int | No
         ...
     NoNewValueFound: no new value return from the callback
     """
+
     def make_func(f: Callable[P, T]):
         return _UniqueRandomCallback(f, tries=tries)
 
     if callback is None:
         return make_func
     return make_func(callback)
-
-
