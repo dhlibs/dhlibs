@@ -6,6 +6,11 @@ authors = ["DinhHuy2010 <huy04052010@outlook.com>"]
 repository = "https://github.com/DinhHuy2010/dhlibs"
 readme = "README.md"
 packages = [{ include = "dhlibs" }]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
