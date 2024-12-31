@@ -6,6 +6,7 @@ authors = ["DinhHuy2010 <huy04052010@outlook.com>"]
 repository = "https://github.com/DinhHuy2010/dhlibs"
 readme = "README.md"
 packages = [{ include = "dhlibs" }]
+license = "MIT OR Apache-2.0 OR LGPL-2.1-or-later"
 
 [tool.poetry.dependencies]
 python = "^3.9"
